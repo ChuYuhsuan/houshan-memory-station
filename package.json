@@ -1,0 +1,76 @@
+{
+  "name": "houshan-memory-station",
+  "productName": "复习小助手3.1",
+  "version": "3.2.2",
+  "description": "厚山忆站 · 面向医学考研的资料驱动 AI 复习助手",
+  "author": "厚山忆站 contributors",
+  "license": "MIT",
+  "main": "main.js",
+  "scripts": {
+    "icon": "node scripts/make-icon.js",
+    "start": "electron .",
+    "build": "node scripts/make-icon.js && electron-builder --win --x64",
+    "dist": "electron-builder --win --x64"
+  },
+  "devDependencies": {
+    "electron": "^44.9.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.houshan.memorystation",
+    "productName": "复习小助手",
+    "copyright": "Copyright © 2026 厚山忆站 contributors",
+    "asar": true,
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "materials.js",
+      "app/**/*",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "node_modules/pdfjs-dist/**"
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "artifactName": "复习小助手3.2.2.exe",
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "复习小助手 3.2.2",
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": true,
+      "language": "2052"
+    },
+    "portable": {
+      "artifactName": "复习小助手3.2.2-便携版.exe",
+      "unpackDirName": "HoushanMemoryStation"
+    }
+  },
+  "dependencies": {
+    "pdfjs-dist": "^3.11.174"
+  }
+}
