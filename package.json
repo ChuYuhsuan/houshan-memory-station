@@ -1,8 +1,8 @@
 {
   "name": "review-assistant-31",
   "productName": "复习小助手3.1",
-  "version": "1.12.1",
-  "description": "复习小助手 1.12.1 · 支持 Word/PPT 资料上传",
+  "version": "1.12.2",
+  "description": "复习小助手 1.12.2 · 关于我们联系方式、版权与学校声明",
   "author": "yorkx",
   "license": "UNLICENSED",
   "private": true,
@@ -53,20 +53,20 @@
       ]
     },
     "nsis": {
-      "artifactName": "复习小助手1.12.1.exe",
+      "artifactName": "复习小助手1.12.2.exe",
       "oneClick": false,
       "perMachine": false,
       "allowElevation": true,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "复习小助手1.12.1",
+      "shortcutName": "复习小助手1.12.2",
       "deleteAppDataOnUninstall": false,
       "runAfterFinish": true,
       "language": "2052"
     },
     "portable": {
-      "artifactName": "复习小助手1.12.1-便携版.exe",
+      "artifactName": "复习小助手1.12.2-便携版.exe",
       "unpackDirName": "ReviewAssistant31"
     }
   },
