@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>复习小助手 1.12.1</title>
+  <title>复习小助手 1.12.2</title>
   <script>try{if(localStorage.getItem('xz_theme_v1')==='dark')document.documentElement.classList.add('theme-dark');}catch(_){}</script>
   <style>
     :root {
@@ -1982,6 +1982,34 @@
     .about-result-grid + .about-roadmap { margin-top: 12px; }
     @media (max-width: 960px) { .about-chart-row { grid-template-columns: 1fr; } .about-tech-grid { grid-template-columns: 1fr; } .about-tech-row { grid-template-columns: 1fr; } .about-feature-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } .about-role-flow { flex-wrap: wrap; } .about-role-step { flex: 1 1 30%; } }
     @media (max-width: 620px) { .about-tabs button { padding: 7px 10px; font-size: 10px; } .about-overview-grid, .about-result-grid { grid-template-columns: 1fr; } .about-feature-grid { grid-template-columns: 1fr 1fr; } .about-role-step { flex-basis: 44%; } }
+    /* ===================== 关于我们 · 联系与声明 ===================== */
+    .about-contact-strip { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; padding: 9px 14px; border: 1px solid rgba(60,139,112,.15); border-radius: 12px; background: rgba(255,255,255,.62); font-size: 10.5px; color: var(--ink-faint); }
+    .about-contact-kicker { font-weight: 700; color: var(--sage-deep); letter-spacing: .05em; }
+    .about-contact-strip a { color: var(--sage-deep); text-decoration: none; border-bottom: 1px solid rgba(60,139,112,.25); padding-bottom: 1px; }
+    .about-contact-strip a:hover { border-bottom-color: var(--sage-deep); }
+    .about-contact-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--gold); }
+    .about-contact-grid { display: grid; grid-template-columns: minmax(0,.78fr) minmax(0,1.22fr); gap: 12px; }
+    .about-contact-card, .about-legal-card, .about-school-notice { border: 1px solid var(--border); border-radius: 13px; background: rgba(255,255,255,.68); padding: 15px 16px; }
+    .about-contact-card h3, .about-legal-card h3 { margin-bottom: 10px; font-size: 13px; }
+    .about-contact-list { display: flex; flex-direction: column; gap: 8px; }
+    .about-contact-list > div { display: grid; grid-template-columns: 52px minmax(0,1fr); gap: 8px; align-items: baseline; }
+    .about-contact-list span { font-size: 9.5px; color: var(--ink-faint); }
+    .about-contact-list b, .about-contact-list a { font-size: 10px; color: var(--ink-soft); font-weight: 500; text-decoration: none; overflow-wrap: anywhere; }
+    .about-contact-list a { color: var(--sage-deep); border-bottom: 1px solid rgba(60,139,112,.22); }
+    .about-contact-list a:hover { border-bottom-color: var(--sage-deep); }
+    .about-contact-note { margin-top: 11px; padding-top: 9px; border-top: 1px dashed rgba(60,139,112,.16); font-size: 9px; line-height: 1.65; color: var(--ink-faint); }
+    .about-legal-card ul { padding-left: 15px; display: flex; flex-direction: column; gap: 7px; }
+    .about-legal-card li { font-size: 9.5px; line-height: 1.7; color: var(--ink-soft); }
+    .about-legal-card li b { color: var(--ink); }
+    .about-school-notice { margin-top: 12px; background: rgba(201,146,47,.045); border-color: rgba(201,146,47,.22); }
+    .about-school-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 7px; }
+    .about-school-head b { font-size: 11px; color: #8a641c; }
+    .about-school-head span { font-size: 8.5px; color: var(--ink-faint); letter-spacing: .08em; }
+    .about-school-notice p { font-size: 9.5px; line-height: 1.8; color: var(--ink-soft); text-align: justify; }
+    .about-school-notice small { display: block; margin-top: 7px; font-size: 8.5px; color: var(--ink-faint); }
+    html.theme-dark .about-contact-strip, html.theme-dark .about-contact-card, html.theme-dark .about-legal-card, html.theme-dark .about-school-notice { background: rgba(38,48,44,.72); border-color: rgba(98,181,150,.16); }
+    html.theme-dark .about-legal-card li, html.theme-dark .about-school-notice p, html.theme-dark .about-contact-list b { color: #b9cbc2; }
+    @media (max-width: 760px) { .about-contact-grid { grid-template-columns: 1fr; } .about-contact-strip { align-items: flex-start; } }
   </style>
 </head>
 <body>
@@ -1996,7 +2024,7 @@
       <div class="brand">
         <div class="brand-logo">🌿</div>
         <div class="brand-text">
-          <div class="brand-title">复习小助手 1.12.1</div>
+          <div class="brand-title">复习小助手 1.12.2</div>
           <div class="brand-sub"><span>AI 出题 · 资料驱动</span><span class="demo-mode-badge" id="demoModeBadge" hidden>演示模式</span></div>
         </div>
       </div>
@@ -2565,12 +2593,20 @@
               <div class="about-metric"><div class="about-metric-top"><span>试卷</span><i>教师产出</i></div><b id="aboutStatPapers">—</b><small>含预览与 PDF 导出</small></div>
             </section>
 
+            <div class="about-contact-strip">
+              <span class="about-contact-kicker">联系项目组</span>
+              <a href="mailto:ChuYuhsuan@outlook.com">ChuYuhsuan@outlook.com</a>
+              <span class="about-contact-dot"></span>
+              <a href="https://github.com/ChuYuhsuan/houshan-memory-station" target="_blank" rel="noopener">GitHub 仓库 ↗</a>
+            </div>
+
             <nav class="about-tabs" role="tablist" aria-label="关于我们内容">
               <button class="active" data-about-tab="overview" type="button">项目总览</button>
               <button data-about-tab="workflow" type="button">按需流程</button>
               <button data-about-tab="tech" type="button">技术方案</button>
               <button data-about-tab="features" type="button">功能与提示词</button>
               <button data-about-tab="results" type="button">成果与计划</button>
+              <button data-about-tab="legal" type="button">联系与声明</button>
             </nav>
 
             <div class="about-panels">
@@ -2731,12 +2767,46 @@
                   <div class="about-road about-road-plan"><div class="about-road-head"><span>计划中</span><i>○</i></div><b>从工具到系统</b><p>题库复用 · 学习效果评估 · 教师班级管理</p></div>
                 </div>
               </section>
+
+              <section class="about-panel" data-about-panel="legal">
+                <div class="about-panel-head">
+                  <h2>联系与声明</h2>
+                  <p>项目联系方式、版权与法律声明、学校参赛通知原文。</p>
+                </div>
+                <div class="about-contact-grid">
+                  <div class="about-contact-card">
+                    <h3>联系项目组</h3>
+                    <div class="about-contact-list">
+                      <div><span>项目</span><b>厚山忆站 · 复习小助手</b></div>
+                      <div><span>负责人</span><b>ChuYuhsuan</b></div>
+                      <div><span>邮箱</span><a href="mailto:ChuYuhsuan@outlook.com">ChuYuhsuan@outlook.com</a></div>
+                      <div><span>GitHub</span><a href="https://github.com/ChuYuhsuan/houshan-memory-station" target="_blank" rel="noopener">github.com/ChuYuhsuan/houshan-memory-station</a></div>
+                    </div>
+                    <p class="about-contact-note">合作、试用或问题反馈，请通过邮箱联系；也可以在 GitHub 仓库提交 Issue。</p>
+                  </div>
+                  <div class="about-legal-card">
+                    <h3>版权与法律声明</h3>
+                    <ul>
+                      <li><b>版权归属：</b>本项目为郑州大学首届 AI 智能体创新应用大赛参赛作品，由厚山忆站项目组（负责人：ChuYuhsuan）开发。除非另有说明，项目原创的界面文案、文档与代码版权归项目团队所有；仓库代码如附带 LICENSE，以 LICENSE 为准。</li>
+                      <li><b>第三方内容：</b>Electron、pdf.js、JSZip 等开源组件版权归各自作者，遵循其许可证；AI 模型服务由第三方提供，输出受其服务条款约束。</li>
+                      <li><b>使用边界：</b>本项目用于学习与教学辅助，不构成医学诊断、治疗或用药建议；AI 生成内容需人工核对。</li>
+                      <li><b>免责声明：</b>软件按“现状”提供，项目团队不对使用后果作明示或默示担保；正式使用前请备份数据，并遵守学校与平台规定。</li>
+                      <li><b>隐私说明：</b>知识点、资料、试卷与答题记录默认保存在本机；调用 AI 时仅发送必要上下文；API Key 由主进程加密，不进入页面。</li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="about-school-notice">
+                  <div class="about-school-head"><b>学校通知与知识产权约定</b><span>原文</span></div>
+                  <p>对具有应用价值的参赛项目，学校享有在校内教学、科研、管理和服务场景中的免费、非独占使用权。项目知识产权及成果转化、商业推广收益原则上归参赛学生团队及指导教师依法享有；涉及学校已有知识产权、科研项目、数据资源或第三方知识产权的，按有关规定执行。对外商业使用或成果转化，由学校与项目团队另行协商。</p>
+                  <small>以上为学校参赛通知原文，具体以学校正式文件为准。</small>
+                </div>
+              </section>
             </div>
 
             <div class="about-footer">
-              <span>复习小助手 1.12.1</span>
+              <span>© 2026 厚山忆站项目组</span>
+              <span>ChuYuhsuan@outlook.com</span>
               <span>本地优先 · AI Key 由系统加密保存</span>
-              <span>郑州大学 · 厚山忆站</span>
             </div>
           </div>
         </section>
