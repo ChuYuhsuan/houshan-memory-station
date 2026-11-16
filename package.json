@@ -1,25 +1,25 @@
 {
-  "name": "houshan-memory-station",
+  "name": "review-assistant-31",
   "productName": "复习小助手3.1",
-  "version": "3.2.2",
-  "description": "厚山忆站 · 面向医学考研的资料驱动 AI 复习助手",
-  "author": "厚山忆站 contributors",
-  "license": "MIT",
+  "version": "1.12.0",
+  "description": "复习小助手 1.12.0 · 关于我们详细版",
+  "author": "yorkx",
+  "license": "UNLICENSED",
+  "private": true,
   "main": "main.js",
   "scripts": {
     "icon": "node scripts/make-icon.js",
     "start": "electron .",
-    "build": "node scripts/make-icon.js && electron-builder --win --x64",
-    "dist": "electron-builder --win --x64"
+    "build": "node scripts/make-icon.js && electron-builder --win --x64"
   },
   "devDependencies": {
     "electron": "^44.9.0",
     "electron-builder": "^26.15.3"
   },
   "build": {
-    "appId": "com.houshan.memorystation",
-    "productName": "复习小助手",
-    "copyright": "Copyright © 2026 厚山忆站 contributors",
+    "appId": "com.yorkx.review31",
+    "productName": "复习小助手3.1",
+    "copyright": "Copyright © 2026 yorkx",
     "asar": true,
     "directories": {
       "output": "dist",
@@ -53,21 +53,21 @@
       ]
     },
     "nsis": {
-      "artifactName": "复习小助手3.2.2.exe",
+      "artifactName": "复习小助手1.12.0.exe",
       "oneClick": false,
       "perMachine": false,
       "allowElevation": true,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "复习小助手 3.2.2",
+      "shortcutName": "复习小助手1.12.0",
       "deleteAppDataOnUninstall": false,
       "runAfterFinish": true,
       "language": "2052"
     },
     "portable": {
-      "artifactName": "复习小助手3.2.2-便携版.exe",
-      "unpackDirName": "HoushanMemoryStation"
+      "artifactName": "复习小助手1.12.0-便携版.exe",
+      "unpackDirName": "ReviewAssistant31"
     }
   },
   "dependencies": {
