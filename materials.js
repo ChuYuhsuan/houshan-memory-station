@@ -11,11 +11,14 @@ const path = require('node:path');
 const fs = require('node:fs');
 const os = require('node:os');
 const { execFile } = require('node:child_process');
+const JSZip = require('jszip');
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024;
 const MAX_FILES_PER_ITEM = 30;
 const ALLOWED = {
   '.pdf': 'pdf',
+  '.docx': 'docx',
+  '.pptx': 'pptx',
   '.png': 'image',
   '.jpg': 'image',
   '.jpeg': 'image',
@@ -27,6 +30,8 @@ const ALLOWED = {
 };
 const MIME = {
   '.pdf': 'application/pdf',
+  '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
@@ -129,6 +134,68 @@ async function extractPdf(file) {
   return parts.join('\n\n');
 }
 
+/* ---------- Word / PPT（OOXML 文字提取） ---------- */
+function decodeXmlText(input) {
+  return String(input || '').replace(/&(#x?[0-9a-f]+|amp|lt|gt|quot|apos);/gi, (m, e) => {
+    const k = String(e).toLowerCase();
+    if (k === 'amp') return '&';
+    if (k === 'lt') return '<';
+    if (k === 'gt') return '>';
+    if (k === 'quot') return '"';
+    if (k === 'apos') return "'";
+    if (k.startsWith('#x')) return String.fromCodePoint(parseInt(k.slice(2), 16));
+    if (k.startsWith('#')) return String.fromCodePoint(parseInt(k.slice(1), 10));
+    return m;
+  });
+}
+
+function xmlParagraphTexts(xml, paragraphTag, textTag) {
+  const out = [];
+  const pRe = new RegExp('<' + paragraphTag + '\\b[^>]*>([\\s\\S]*?)<\\/' + paragraphTag + '>', 'g');
+  const tRe = new RegExp('<' + textTag + '(?:\\s[^>]*)?>([\\s\\S]*?)<\\/' + textTag + '>', 'g');
+  let pm;
+  while ((pm = pRe.exec(xml))) {
+    const inner = pm[1].replace(/<w:tab\b[^>]*\/>/g, '\t').replace(/<w:br\b[^>]*\/>/g, '\n');
+    const pieces = [];
+    let tm;
+    while ((tm = tRe.exec(inner))) pieces.push(decodeXmlText(tm[1]));
+    const line = pieces.join('').replace(/[ \t]+/g, ' ').replace(/\s+\n/g, '\n').trim();
+    if (line) out.push(line);
+  }
+  return out;
+}
+
+async function extractDocx(file) {
+  const zip = await JSZip.loadAsync(await fs.promises.readFile(file));
+  const part = zip.file('word/document.xml');
+  if (!part) throw new Error('Word 文档结构异常');
+  const xml = await part.async('string');
+  const paragraphs = xmlParagraphTexts(xml, 'w:p', 'w:t');
+  return paragraphs.join('\n');
+}
+
+async function extractPptx(file) {
+  const zip = await JSZip.loadAsync(await fs.promises.readFile(file));
+  const slideNames = Object.keys(zip.files)
+    .filter((n) => /^ppt\/slides\/slide\d+\.xml$/i.test(n))
+    .sort((a, b) => Number(a.match(/slide(\d+)\.xml/i)[1]) - Number(b.match(/slide(\d+)\.xml/i)[1]));
+  if (!slideNames.length) throw new Error('PPT 中没有找到幻灯片');
+  const parts = [];
+  for (const name of slideNames) {
+    const n = Number(name.match(/slide(\d+)\.xml/i)[1]);
+    const xml = await zip.file(name).async('string');
+    const lines = xmlParagraphTexts(xml, 'a:p', 'a:t');
+    const notesPart = zip.file('ppt/notesSlides/notesSlide' + n + '.xml');
+    let notes = [];
+    if (notesPart) {
+      const notesXml = await notesPart.async('string');
+      notes = xmlParagraphTexts(notesXml, 'a:p', 'a:t').filter((x) => !/^\d+$/.test(x));
+    }
+    parts.push('【第' + n + '页】\n' + lines.join('\n') + (notes.length ? '\n【备注】\n' + notes.join('\n') : ''));
+  }
+  return parts.join('\n\n');
+}
+
 /* ---------- 工具 ---------- */
 function cleanText(input) {
   return String(input || '')
@@ -177,7 +244,7 @@ function init(root, deps) {
       buttonLabel: '添加',
       properties: ['openFile', 'multiSelections'],
       filters: [
-        { name: '资料（PDF / 图片 / 文本）', extensions: ['pdf', 'png', 'jpg', 'jpeg', 'webp', 'bmp', 'txt', 'md'] },
+        { name: '资料（PDF / Word / PPT / 图片 / 文本）', extensions: ['pdf', 'docx', 'pptx', 'png', 'jpg', 'jpeg', 'webp', 'bmp', 'txt', 'md'] },
         { name: '所有文件', extensions: ['*'] }
       ]
     });
@@ -187,6 +254,7 @@ function init(root, deps) {
   ipcMain.handle('materials:add', async (_event, payload) => {
     const { scope, itemId, filePath } = payload || {};
     const ext = path.extname(String(filePath || '')).toLowerCase();
+    if (ext === '.doc' || ext === '.ppt') throw new Error('旧版 .doc / .ppt 暂不支持，请先另存为 .docx / .pptx，或导出 PDF 后上传');
     const kind = ALLOWED[ext];
     if (!kind) throw new Error('不支持该文件类型');
     const stat = await fs.promises.stat(filePath);
@@ -211,6 +279,12 @@ function init(root, deps) {
         if (text.replace(/\s/g, '').length < 20) {
           error = '这个 PDF 没有可提取的文字层（可能是扫描件），建议上传截图或手动补充文字';
         }
+      } else if (kind === 'docx') {
+        text = await extractDocx(path.join(dir, stored));
+        if (text.replace(/\s/g, '').length < 20) error = 'Word 文档没有提取到文字，可能是纯图片文档；建议转为 PDF 或上传截图';
+      } else if (kind === 'pptx') {
+        text = await extractPptx(path.join(dir, stored));
+        if (text.replace(/\s/g, '').length < 20) error = 'PPT 中没有提取到文字，可能是纯图片幻灯片；建议转为 PDF 或上传截图';
       } else if (kind === 'image') {
         text = await ocrImage(path.join(dir, stored));
         ocr = true;

@@ -606,7 +606,7 @@ function createWindow() {
     minWidth: 420,
     minHeight: 560,
     show: false,
-    title: IS_DEMO ? '复习小助手1.12.0（演示模式）' : '复习小助手1.12.0',
+    title: IS_DEMO ? '复习小助手1.12.1（演示模式）' : '复习小助手1.12.1',
     backgroundColor: '#eef7f1',
     autoHideMenuBar: true,
     webPreferences: {
