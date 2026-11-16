@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>复习小助手 1.12.2</title>
+  <title>复习小助手 1.12.3</title>
   <script>try{if(localStorage.getItem('xz_theme_v1')==='dark')document.documentElement.classList.add('theme-dark');}catch(_){}</script>
   <style>
     :root {
@@ -695,6 +695,24 @@
     .ai-model-row { display: flex; gap: 8px; align-items: center; }
     .ai-model-row input { flex: 1; min-width: 0; }
     .ai-model-row .btn-mini { flex: 0 0 auto; white-space: nowrap; }
+    .ai-model-field { position: relative; }
+    .ai-model-input-wrap { position: relative; flex: 1; min-width: 0; }
+    .ai-model-input-wrap input { width: 100%; padding-right: 34px; }
+    .ai-model-caret { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 26px; height: 26px; border: 0; border-radius: 7px; background: transparent; color: var(--ink-faint); font-size: 13px; line-height: 1; cursor: pointer; }
+    .ai-model-caret:hover { background: rgba(60,139,112,.08); color: var(--sage-deep); }
+    .ai-model-menu { position: absolute; left: 0; right: 0; top: calc(100% - 1px); z-index: 60; padding: 8px; border: 1px solid var(--border); border-radius: 12px; background: rgba(255,255,255,.98); box-shadow: 0 14px 34px rgba(20,45,35,.14); }
+    .ai-model-menu-search { margin-bottom: 7px; }
+    .ai-model-menu-search input { width: 100%; padding: 7px 9px; font-size: 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--ink); }
+    .ai-model-list { max-height: 230px; overflow-y: auto; padding-right: 2px; }
+    .ai-model-option { display: block; width: 100%; padding: 7px 9px; border: 0; border-radius: 7px; background: transparent; color: var(--ink-soft); font: inherit; font-size: 10px; text-align: left; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ai-model-option:hover { background: rgba(60,139,112,.08); color: var(--sage-deep); }
+    .ai-model-option.active { background: var(--sage-light); color: var(--sage-deep); font-weight: 700; }
+    .ai-model-empty { padding: 12px 8px; color: var(--ink-faint); font-size: 10px; text-align: center; }
+    html.theme-dark .ai-model-menu { background: rgba(var(--surface-rgb), .98); border-color: rgba(255,255,255,.12); }
+    html.theme-dark .ai-model-option { color: var(--ink-soft); }
+    html.theme-dark .ai-model-option:hover { background: rgba(98,181,150,.12); }
+    html.theme-dark .ai-model-option.active { background: rgba(98,181,150,.16); color: #9fe0c4; }
+
     .ai-current { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding: 9px 11px; border-radius: 10px; background: rgba(60, 139, 112, .07); color: var(--ink-soft); font-size: 12px; }
     .ai-current-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-faint); flex: 0 0 auto; }
     .ai-current.ok .ai-current-dot { background: var(--sage); box-shadow: 0 0 0 3px rgba(60, 139, 112, .12); }
@@ -2024,7 +2042,7 @@
       <div class="brand">
         <div class="brand-logo">🌿</div>
         <div class="brand-text">
-          <div class="brand-title">复习小助手 1.12.2</div>
+          <div class="brand-title">复习小助手 1.12.3</div>
           <div class="brand-sub"><span>AI 出题 · 资料驱动</span><span class="demo-mode-badge" id="demoModeBadge" hidden>演示模式</span></div>
         </div>
       </div>
@@ -2218,12 +2236,18 @@
             <div class="set-grid two">
               <div class="field"><label for="aiProvider">平台</label>
                 <select id="aiProvider"><option value="deepseek">DeepSeek</option></select></div>
-              <div class="field"><label for="aiModel">模型</label>
+              <div class="field ai-model-field"><label for="aiModel">模型</label>
                 <div class="ai-model-row">
-                  <input type="text" id="aiModel" list="aiModelOptions" placeholder="选择平台后自动带出" autocomplete="off" spellcheck="false" />
+                  <div class="ai-model-input-wrap">
+                    <input type="text" id="aiModel" placeholder="选择平台后自动带出" autocomplete="off" spellcheck="false" />
+                    <button class="ai-model-caret" id="aiModelToggle" type="button" aria-label="展开模型列表" aria-expanded="false">▾</button>
+                  </div>
                   <button class="btn-mini" id="aiModelsRefresh" type="button">获取列表</button>
                 </div>
-                <datalist id="aiModelOptions"></datalist>
+                <div class="ai-model-menu" id="aiModelMenu" hidden>
+                  <div class="ai-model-menu-search"><input type="search" id="aiModelSearch" placeholder="搜索模型名…" autocomplete="off" /></div>
+                  <div class="ai-model-list" id="aiModelList"></div>
+                </div>
               </div>
             </div>
             <div class="field"><label for="aiBase">接口地址</label><input type="text" id="aiBase" placeholder="选择平台后自动填写" autocomplete="off" spellcheck="false" /></div>
@@ -5282,11 +5306,50 @@ candidates：${JSON.stringify(context)}
     return providers.find((p) => p.id === id) || null;
   }
 
-  function fillModelOptions(provider, savedModel) {
-    const box = $('#aiModelOptions');
+  let modelOptions = [];
+
+  function setModelOptions(list) {
+    modelOptions = [...new Set((Array.isArray(list) ? list : []).filter(Boolean))];
+    renderModelMenu();
+  }
+
+  function renderModelMenu(query) {
+    const box = $('#aiModelList');
     if (!box) return;
-    const list = [...new Set([...(provider && provider.models ? provider.models : []), savedModel].filter(Boolean))];
-    box.innerHTML = list.map((m) => `<option value="${escapeHtml(m)}"></option>`).join('');
+    const q = String(query || '').trim().toLowerCase();
+    const current = $('#aiModel') ? $('#aiModel').value.trim() : '';
+    const list = modelOptions.filter((m) => !q || String(m).toLowerCase().includes(q));
+    if (!list.length) {
+      box.innerHTML = '<div class="ai-model-empty">没有匹配的模型</div>';
+      return;
+    }
+    box.innerHTML = list.map((m) => {
+      const active = m === current ? ' active' : '';
+      return '<button type="button" class="ai-model-option' + active + '" data-model="' + escapeHtml(m) + '">' + escapeHtml(m) + '</button>';
+    }).join('');
+  }
+
+  function openModelMenu() {
+    const menu = $('#aiModelMenu');
+    if (!menu) return;
+    menu.hidden = false;
+    const search = $('#aiModelSearch');
+    if (search) search.value = '';
+    renderModelMenu('');
+    const toggle = $('#aiModelToggle');
+    if (toggle) toggle.setAttribute('aria-expanded', 'true');
+    if (search) search.focus();
+  }
+
+  function closeModelMenu() {
+    const menu = $('#aiModelMenu');
+    if (menu) menu.hidden = true;
+    const toggle = $('#aiModelToggle');
+    if (toggle) toggle.setAttribute('aria-expanded', 'false');
+  }
+
+  function fillModelOptions(provider, savedModel) {
+    setModelOptions([...(provider && provider.models ? provider.models : []), savedModel]);
   }
 
   function applyProviderToForm(id, saved) {
@@ -5405,8 +5468,7 @@ candidates：${JSON.stringify(context)}
       if (r && r.ok && Array.isArray(r.models) && r.models.length) {
         const p = providerById($('#aiProvider').value) || {};
         const merged = [...new Set([...(p.models || []), ...r.models])];
-        const box = $('#aiModelOptions');
-        if (box) box.innerHTML = merged.map((m) => `<option value="${escapeHtml(m)}"></option>`).join('');
+        setModelOptions(merged);
         const model = $('#aiModel');
         if (model && !model.value.trim()) model.value = r.models[0];
         if (typeof toast === 'function') toast(`已获取 ${r.models.length} 个模型`);
@@ -7308,6 +7370,13 @@ ${avoid}
 
     $('#aiProvider')?.addEventListener('change', (e) => switchProvider(e.target.value));
     $('#aiModelsRefresh')?.addEventListener('click', refreshModelList);
+  $('#aiModel')?.addEventListener('focus', openModelMenu);
+  $('#aiModel')?.addEventListener('click', openModelMenu);
+  $('#aiModelToggle')?.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); const menu = $('#aiModelMenu'); if (menu && menu.hidden) openModelMenu(); else closeModelMenu(); });
+  $('#aiModelSearch')?.addEventListener('input', (e) => renderModelMenu(e.target.value));
+  $('#aiModelList')?.addEventListener('click', (e) => { const btn = e.target.closest('[data-model]'); if (!btn) return; const model = $('#aiModel'); if (model) model.value = btn.getAttribute('data-model'); closeModelMenu(); });
+  document.addEventListener('click', (e) => { if (!e.target.closest('.ai-model-field')) closeModelMenu(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModelMenu(); });
 
     $('#aiClear').addEventListener('click', async () => {
       if (!isDesktop) return;
