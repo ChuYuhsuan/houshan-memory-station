@@ -1,8 +1,8 @@
 {
   "name": "review-assistant-31",
   "productName": "复习小助手3.1",
-  "version": "1.12.3",
-  "description": "复习小助手 1.12.3 · 模型列表修复",
+  "version": "1.13.0",
+  "description": "复习小助手 1.13.0 · 多皮肤与界面主题",
   "author": "yorkx",
   "license": "UNLICENSED",
   "private": true,
@@ -53,20 +53,20 @@
       ]
     },
     "nsis": {
-      "artifactName": "复习小助手1.12.3.exe",
+      "artifactName": "复习小助手1.13.0.exe",
       "oneClick": false,
       "perMachine": false,
       "allowElevation": true,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "复习小助手1.12.3",
+      "shortcutName": "复习小助手1.13.0",
       "deleteAppDataOnUninstall": false,
       "runAfterFinish": true,
       "language": "2052"
     },
     "portable": {
-      "artifactName": "复习小助手1.12.3-便携版.exe",
+      "artifactName": "复习小助手1.13.0-便携版.exe",
       "unpackDirName": "ReviewAssistant31"
     }
   },
